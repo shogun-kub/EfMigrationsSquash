@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.IO;
+using System.Text.RegularExpressions;
 
 var def = Console.ForegroundColor;
 Console.ForegroundColor = ConsoleColor.Yellow;
@@ -8,8 +9,11 @@ Console.WriteLine(" this tool will delete the squashed migration files, if somet
     "use it at your own risk\n\npress any key to continue or (Q) to quit");
 
 if (Console.ReadKey().Key == ConsoleKey.Q) return;
-Console.SetCursorPosition(Console.CursorLeft - 1, Console.CursorTop);
-Console.Write("\0");
+if (Console.CursorLeft > 0)
+{
+    Console.SetCursorPosition(Console.CursorLeft - 1, Console.CursorTop);
+    Console.Write("\0");
+}
 
 var migrationsFolder = Path.Combine(Directory.GetCurrentDirectory(), "Migrations");
 
@@ -19,13 +23,42 @@ if (!Directory.Exists(migrationsFolder))
     return;
 }
 
-var files = Directory.EnumerateFiles(migrationsFolder).Where(x => !x.EndsWith(".Designer.cs")).ToList();
+var files = Directory.EnumerateFiles(migrationsFolder).Where(x => !x.EndsWith(".Designer.cs") && x.EndsWith(".cs")).ToList();
 
 if (files.Count == 0)
 {
-    Console.Write("No migration files found!");
-    return;
+    Console.Write("No migration files found within base directory!");
+
+    var directories = Directory.EnumerateDirectories(migrationsFolder).ToList();
+
+    Console.WriteLine("Select migrations directory by pressing a number:");
+
+    foreach (var directory in directories)
+    {
+        Console.WriteLine($"{directories.IndexOf(directory) + 1} - {Path.GetFileName(directory)}");
+    }
+    var directoryNum = 0;
+
+    while (!int.TryParse(Console.ReadLine(), out directoryNum)) Console.Write("Invalid input. Try again: ");
+
+    if (directoryNum < 1 || directoryNum > directories.Count)
+    {
+        Console.Write("No migration with this number!");
+        return;
+    }
+
+    migrationsFolder = directories[directoryNum - 1];
+
+    files = Directory.EnumerateFiles(migrationsFolder).Where(x => !x.EndsWith(".Designer.cs") && x.EndsWith(".cs")).ToList();
+
+    if (files.Count == 0)
+    {
+        Console.Write("No migration files found!");
+        return;
+    }
 }
+
+
 
 files = files.Take(files.Count - 1).ToList();
 
