@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -14,5 +14,10 @@
 
 	<PackageOutputPath>./nupkg</PackageOutputPath>
   </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Syntax-only validation of the folded result before anything is written. -->
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.13.0" />
+  </ItemGroup>
 
 </Project>
